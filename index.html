@@ -1,0 +1,92 @@
+<!DOCTYPE html><html lang="bn"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><title>ভালোবাসার দৌড় 3D 💕</title>
+<style>
+body{margin:0;padding:10px;background:#fff0f5;color:#4a1030;font-family:system-ui,sans-serif;text-align:center}
+h1{font-size:22px;margin:8px 0}.card{background:#fff;border-radius:16px;padding:14px;max-width:520px;margin:10px auto;box-shadow:0 2px 10px #0002}
+.row{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}.pick{flex:1;min-width:140px}
+.pick img{display:none;width:80px;height:80px;border-radius:50%;object-fit:cover;margin:6px auto}
+label{display:block;font-weight:600;margin-bottom:6px}input[type=file]{max-width:100%;font-size:13px}
+button{background:#e91e63;color:#fff;border:0;border-radius:24px;padding:12px 28px;font-size:18px;margin-top:12px}
+#g{display:none}#wrap{position:relative;display:inline-block;touch-action:manipulation;user-select:none}
+canvas{border-radius:14px;display:block}
+#hud{position:absolute;top:8px;left:8px;right:8px;display:flex;justify-content:space-between;font:bold 14px system-ui;color:#4a1030;text-shadow:0 0 4px #fff}
+#bar{width:120px;height:12px;background:#fff9;border-radius:8px;overflow:hidden;margin-top:3px}#bf{height:100%;width:0;background:#e91e63}
+#msg{position:absolute;top:22%;left:0;right:0;font:bold 24px system-ui;color:#d50000;text-shadow:0 0 6px #fff,0 0 6px #fff}
+</style></head><body>
+<div id="setup"><h1>💕 ভালোবাসার দৌড় 3D 💕</h1>
+<div class="card"><div class="row">
+<div class="pick"><label>👦 ছেলের ছবি</label><img id="pb"><input type="file" accept="image/*" id="fb"></div>
+<div class="pick"><label>👧 মেয়ের ছবি</label><img id="pg"><input type="file" accept="image/*" id="fg"></div></div>
+<p style="font-size:14px">মেয়ে: লাফ দিয়ে ব্লক পার হও, ❤️ ধরো (স্ক্রিনে ট্যাপ / স্পেস)। ১২টা ❤️ হলেই ঝাড়ু-পেটানি!<br>ছবি শুধু তোমার ডিভাইসেই থাকে, কোথাও আপলোড হয় না।</p>
+<button id="go">শুরু করো 🏃‍♂️🧹</button></div></div>
+<div id="g"><div id="wrap"><div id="hud"><div>❤️ <span id="hh">0</span>/12<div id="bar"><div id="bf"></div></div></div><div id="ht"></div></div><div id="msg"></div></div></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+const $=i=>document.getElementById(i),tex={b:null,g:null};
+function sq(img){const c=document.createElement('canvas');c.width=c.height=256;const m=Math.min(img.width,img.height);c.getContext('2d').drawImage(img,(img.width-m)/2,(img.height-m)/2,m,m,0,0,256,256);return new THREE.CanvasTexture(c)}
+function emo(e){const c=document.createElement('canvas');c.width=c.height=256;const t=c.getContext('2d');t.fillStyle='#ffd9b3';t.fillRect(0,0,256,256);t.font='170px serif';t.textAlign='center';t.fillText(e,128,190);return new THREE.CanvasTexture(c)}
+function load(inp,k){const f=inp.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{const i=new Image();i.onload=()=>{tex[k]=sq(i);$('p'+k).src=r.result;$('p'+k).style.display='block'};i.src=r.result};r.readAsDataURL(f)}
+$('fb').onchange=e=>load(e.target,'b');$('fg').onchange=e=>load(e.target,'g');
+const sc=new THREE.Scene();sc.background=new THREE.Color(0xbfe9ff);sc.fog=new THREE.Fog(0xbfe9ff,600,1200);
+const cam=new THREE.PerspectiveCamera(50,1.5,1,2000),ren=new THREE.WebGLRenderer({antialias:true});$('wrap').insertBefore(ren.domElement,$('hud'));
+function rs(){const w=Math.min(innerWidth-20,800),h=Math.round(w*(innerWidth<600?.9:.55));ren.setSize(w,h);cam.aspect=w/h;cam.updateProjectionMatrix();cam.position.set(-20,130,Math.max(360,300/(Math.tan(.436)*cam.aspect)));cam.lookAt(-20,60,0)}
+addEventListener('resize',rs);
+sc.add(new THREE.AmbientLight(0xffffff,.75));const dl=new THREE.DirectionalLight(0xffffff,.6);dl.position.set(100,300,300);sc.add(dl);
+const M=c=>new THREE.MeshLambertMaterial({color:c});
+const gr=new THREE.Mesh(new THREE.PlaneGeometry(2400,900),M(0x7ed957));gr.rotation.x=-Math.PI/2;sc.add(gr);
+const pth=new THREE.Mesh(new THREE.PlaneGeometry(2400,100),M(0xe8c07a));pth.rotation.x=-Math.PI/2;pth.position.y=.5;sc.add(pth);
+const trees=[],dash=[];
+for(let i=0;i<14;i++){const t=new THREE.Group(),k=new THREE.Mesh(new THREE.CylinderGeometry(6,8,40),M(0x8d5524));k.position.y=20;const l=new THREE.Mesh(new THREE.ConeGeometry(28,70,8),M(0x2e9e44));l.position.y=70;t.add(k,l);t.position.set(-500+i*75,0,-90-Math.random()*120);sc.add(t);trees.push(t)}
+for(let i=0;i<12;i++){const d=new THREE.Mesh(new THREE.BoxGeometry(30,1,5),M(0xffffff));d.position.set(-450+i*80,1,45);sc.add(d);dash.push(d)}
+function person(tx,shirt,e){
+ const g=new THREE.Group();
+ const add=(m,x,y,z,p=g)=>{m.position.set(x,y,z);p.add(m);return m};
+ add(new THREE.Mesh(new THREE.BoxGeometry(26,34,16),M(shirt)),0,52,0);
+ add(new THREE.Mesh(new THREE.SphereGeometry(26,24,16),M(0xffd9b3)),0,88,0);
+ add(new THREE.Mesh(new THREE.CircleGeometry(23,32),new THREE.MeshBasicMaterial({map:tx||emo(e)})),0,88,19);
+ const piv=(x,y,len,w,c)=>{const p=new THREE.Group();p.position.set(x,y,0);g.add(p);add(new THREE.Mesh(new THREE.BoxGeometry(w,len,w),M(c)),0,-len/2,0,p);return p};
+ return{g,ll:piv(-6,35,35,9,0x333355),lr:piv(6,35,35,9,0x333355),al:piv(-17,66,26,7,0xffd9b3),ar:piv(17,66,26,7,0xffd9b3),add}
+}
+let B,Gi;
+function build(){
+ B=person(tex.b,0x2962ff,'👦');Gi=person(tex.g,0xe91e63,'👧');
+ B.add(new THREE.Mesh(new THREE.BoxGeometry(14,8,5),M(0x5d3a1a)),0,-26,6,B.ar);
+ const fl=new THREE.Group();B.add(new THREE.Mesh(new THREE.CylinderGeometry(1.5,1.5,22),M(0x2e9e44)),0,-26,6,B.al);
+ [[0,-12],[-5,-16],[5,-16]].forEach(p=>B.add(new THREE.Mesh(new THREE.SphereGeometry(6,10,8),M(0xff4081)),p[0],-12+p[1]+8,6,B.al));
+ const br=new THREE.Group();br.position.set(0,-26,4);Gi.ar.add(br);
+ const st=new THREE.Mesh(new THREE.CylinderGeometry(2,2,56),M(0x8d5524));st.position.y=10;const bs=new THREE.Mesh(new THREE.ConeGeometry(11,24,10),M(0xe0b050));bs.position.y=-18;bs.rotation.x=Math.PI;br.add(st,bs);
+ sc.add(B.g,Gi.g);
+}
+const hs=new THREE.Shape();hs.moveTo(0,-12);hs.bezierCurveTo(-24,4,-12,22,0,9);hs.bezierCurveTo(12,22,24,4,0,-12);
+const hg=new THREE.ExtrudeGeometry(hs,{depth:8,bevelEnabled:true,bevelSize:2,bevelThickness:2}),hm=new THREE.MeshLambertMaterial({color:0xff1744,emissive:0x550010});
+const RX=-220,BX=-60,HX=-110;let S,last=0,acc=0;
+function reset(){S={t:0,sp:5,gy:0,vy:0,h:0,tot:0,rd:0,obs:[],it:[],nx:60,ph:'run',pt:0,pd:0,st:0,gx:RX,msg:'',mt:0}}
+function jump(){if(S&&S.ph==='run'&&S.gy===0)S.vy=14}
+$('wrap').addEventListener('pointerdown',jump);addEventListener('keydown',e=>{if(e.code==='Space'||e.code==='ArrowUp'){e.preventDefault();jump()}});
+$('go').onclick=()=>{$('setup').style.display='none';$('g').style.display='block';rs();build();reset();last=performance.now();requestAnimationFrame(loop)};
+function clr(){S.obs.forEach(o=>sc.remove(o.m));S.it.forEach(o=>sc.remove(o.m));S.obs=[];S.it=[]}
+function say(m){S.msg=m;S.mt=70}
+function step(){
+ S.t++;if(S.mt>0)S.mt--;
+ if(S.ph==='beat'){S.pt-=1/60;S.gx+=(HX-S.gx)*.15;if(S.pt<=0){S.ph='run';S.nx=70}return}
+ S.gx+=(RX-S.gx)*.15;S.sp=5+Math.min(S.tot/12,3);if(S.st>0)S.st--;
+ S.vy-=.7;S.gy+=S.vy;if(S.gy<=0){S.gy=0;S.vy=0}
+ if(--S.nx<=0){if(Math.random()<.45){const h=40+Math.random()*20,m=new THREE.Mesh(new THREE.BoxGeometry(40,h,40),M(0x8d5524));m.position.set(380,h/2,0);sc.add(m);S.obs.push({x:380,h,m})}else{const y=50+Math.random()*130,m=new THREE.Mesh(hg,hm);m.position.set(380,y,0);sc.add(m);S.it.push({x:380,y,m})}S.nx=55+Math.random()*45}
+ const l=S.gx-14,r=S.gx+14,b=S.gy;
+ S.obs=S.obs.filter(o=>{o.x-=S.sp;o.m.position.x=o.x;if(o.x<-340){sc.remove(o.m);return false}
+  if(S.st<=0&&r>o.x-20&&l<o.x+20&&b<o.h){S.st=50;S.h=Math.max(0,S.h-1);say('ধাক্কা! 😵 -১ ❤️');sc.remove(o.m);return false}return true});
+ S.it=S.it.filter(o=>{o.x-=S.sp;o.m.position.x=o.x;o.m.rotation.y+=.06;if(o.x<-340){sc.remove(o.m);return false}
+  if(Math.abs(o.x-S.gx)<30&&o.y>b-16&&o.y<b+130){S.h++;S.tot++;sc.remove(o.m);if(S.h>=12){S.pd=S.rd%2===0?3:5;S.pt=S.pd;S.rd++;S.h=0;S.ph='beat';clr()}return false}return true});
+ if(S.ph==='run'){trees.forEach(t=>{t.position.x-=S.sp*.5;if(t.position.x<-520)t.position.x+=1050});dash.forEach(d=>{d.position.x-=S.sp;if(d.position.x<-480)d.position.x+=960})}
+}
+function upd(){
+ const beat=S.ph==='beat',run=!beat&&S.gy===0,sw=Math.sin(S.t*.3)*.8;
+ Gi.g.position.set(S.gx,S.gy,0);Gi.g.visible=!(S.st>0&&S.t%6<3);
+ Gi.ll.rotation.x=run?sw:(beat?0:.6);Gi.lr.rotation.x=run?-sw:(beat?0:-.6);
+ Gi.ar.rotation.z=beat?1.6+Math.sin(S.t*.6)*1.2:0;Gi.ar.rotation.x=beat?0:-sw*.5;
+ B.g.position.set(BX+(beat?Math.random()*6-3:0),0,0);B.g.rotation.z=beat?Math.sin(S.t*.8)*.2:0;
+ B.ll.rotation.x=sw;B.lr.rotation.x=-sw;B.al.rotation.x=B.ar.rotation.x=0;
+ $('hh').textContent=S.h;$('bf').style.width=S.h/12*100+'%';$('ht').innerHTML='মোট ❤️ '+S.tot+'<br>পেটানি '+S.rd+' বার';
+ $('msg').innerHTML=beat?'আউউউ! 😭 ঝাড়ু-পেটানি: '+Math.ceil(S.pt)+' সেকেন্ড<br><small>এবার '+S.pd+' সেকেন্ড!</small>':(S.mt>0?S.msg:'');
+}
+function loop(ts){acc+=Math.min(ts-last,100);last=ts;while(acc>=16.67){step();acc-=16.67}upd();ren.render(sc,cam);requestAnimationFrame(loop)}
+</script></body></html>
